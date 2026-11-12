@@ -38,6 +38,8 @@ utiliza los apuntes, la documentación, las pruebas propias y las tutorías. Si 
 forma puntual, decláralo en el README y comprueba que puedes explicar, probar y modificar
 todo el código generado. La IA no está permitida en simulacros, controles ni exámenes.
 
+***Todo el codigo esta escrito a manos por mí, únicamente he usado inteligencia artificial para buscar informacion sobre la librería de pygame. Es decir, como una forma mas rápida de acceder a la documentación***
+
 ## Requisitos previos
 1. Asegúrate de tener Python 3.10 o superior.
 2. Instala `pygame` en tu entorno si aún no lo tienes:
