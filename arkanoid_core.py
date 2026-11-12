@@ -38,11 +38,12 @@ class ArkanoidGame:
     # Paleta
     PADDLE_SIZE = (120, 18)
     PADDLE_OFFSET = 48
-    PADDLE_SPEED = 8.0
+    PADDLE_SPEED = 14
 
     # Bola
     BALL_RADIUS = 10
-    BALL_SPEED = 6.0
+    BALL_SPEED = 4
+    BALL_THRESHOLD_SPEED = 10 # a partir de esa velocidad ya no aumenta
 
     # Bloques
     BLOCK_WIDTH = 60
@@ -55,12 +56,21 @@ class ArkanoidGame:
         "#": (214, 103, 103),
         "@": (102, 170, 214),
         "%": (234, 190, 104),
+
     }
     BLOCK_POINTS = {
         "#": 50,
         "@": 75,
         "%": 120,
     }
+
+    BLOCK_LIVES = { # Para poder tener bloques reforzados
+        "#": 1,
+        "@": 2,
+        "%": 1,
+    }
+
+    BLOCK_SYMBOLS = ["#", "@", "%", "."]
 
     # Entradas y eventos (para minimizar el uso directo de pygame en la plantilla)
     KEY_LEFT = pygame.K_LEFT
@@ -78,9 +88,11 @@ class ArkanoidGame:
 
         # Entidades
         self.paddle = self.crear_rect(0, 0, *self.PADDLE_SIZE)
+
         self.blocks: list[pygame.Rect] = []
         self.block_colors: list[tuple[int, int, int]] = []
         self.block_symbols: list[str] = []
+        self.block_lives: list[int] = [] # Para poder tener bloques reforzados
         self.ball_pos = Vector2(0, 0)
         self.ball_velocity = Vector2(0, 0)
 
@@ -99,7 +111,7 @@ class ArkanoidGame:
     # ------------------------------------------------------------------ #
     # Métodos auxiliares ya implementados para el hito
     # ------------------------------------------------------------------ #
-    def reiniciar_bola(self, direction: Vector2 | Iterable[float] = (0, -1)) -> None:
+    def reiniciar_bola(self, direction: Vector2 | Iterable[float] = (1, -1)) -> None:
         """Coloca la bola justo encima de la paleta y reinicia su velocidad."""
         if isinstance(direction, Vector2):
             direccion = direction
@@ -138,6 +150,14 @@ class ArkanoidGame:
             os.environ["SDL_VIDEODRIVER"] = "dummy"
 
         pygame.init()
+
+        pygame.mixer.init() # inicializamos el mixer de sonidos y todos los sonidos para utilizar
+        self.music = pygame.mixer.Sound("sonidos/music.wav")
+        self.bounce = pygame.mixer.Sound("sonidos/bounce.wav")
+        self.winning = pygame.mixer.Sound("sonidos/winning.wav")
+        self.losing = pygame.mixer.Sound("sonidos/losing.wav")
+        self.reinforce_block = pygame.mixer.Sound("sonidos/reinforced_block.wav")
+
         pygame.display.set_caption("Arkanoid M2")
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
@@ -165,6 +185,7 @@ class ArkanoidGame:
             return
 
         fuente = self._obtener_fuente(grande)
+  
         if not fuente:
             return
 
